@@ -1,6 +1,7 @@
+import base64
 from pathlib import PurePosixPath
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 
 import requests
 
@@ -106,6 +107,37 @@ def get_repo_tree(repo_url: str) -> list[dict[str, str]]:
         )
 
     return files
+
+
+def get_file_content(repo_url: str, file_path: str) -> str:
+    """
+    Fetch a repository file from the GitHub API and return its decoded text content.
+    """
+    if not file_path or not file_path.strip():
+        raise ValueError("File path is required.")
+
+    repo_info = extract_repo_info(repo_url)
+    owner = repo_info["owner"]
+    repo = repo_info["repo"]
+
+    encoded_path = quote(file_path.strip(), safe="/")
+    file_response = _github_get(f"/repos/{owner}/{repo}/contents/{encoded_path}")
+
+    if file_response.get("type") != "file":
+        raise RuntimeError(f"{file_path} is not a regular file.")
+
+    encoded_content = file_response.get("content")
+    if not encoded_content:
+        raise RuntimeError(f"GitHub API did not return content for {file_path}.")
+
+    if file_response.get("encoding") != "base64":
+        raise RuntimeError(f"Unsupported content encoding for {file_path}.")
+
+    try:
+        decoded_bytes = base64.b64decode(encoded_content)
+        return decoded_bytes.decode("utf-8", errors="replace")
+    except (ValueError, TypeError) as exc:
+        raise RuntimeError(f"Could not decode file content for {file_path}.") from exc
 
 
 def _github_get(endpoint: str, params: dict[str, str] | None = None) -> dict[str, Any]:
