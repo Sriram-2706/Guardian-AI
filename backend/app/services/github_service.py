@@ -121,7 +121,10 @@ def get_file_content(repo_url: str, file_path: str) -> str:
     repo = repo_info["repo"]
 
     encoded_path = quote(file_path.strip(), safe="/")
-    file_response = _github_get(f"/repos/{owner}/{repo}/contents/{encoded_path}")
+    try:
+        file_response = _github_get(f"/repos/{owner}/{repo}/contents/{encoded_path}")
+    except RuntimeError as exc:
+        raise RuntimeError(f"GitHub API did not return content for {file_path}.") from exc
 
     if file_response.get("type") != "file":
         raise RuntimeError(f"{file_path} is not a regular file.")

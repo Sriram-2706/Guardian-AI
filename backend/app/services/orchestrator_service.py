@@ -22,7 +22,11 @@ def run_repository_analysis(repo_url: str) -> dict:
 
     for file_info in top_files:
         file_path = file_info.get("path", "")
-        file_content = get_file_content(repo_url, file_path)
+        try:
+            file_content = get_file_content(repo_url, file_path)
+        except Exception:
+            file_content = ""
+
         finding = analyze_security(file_path, file_content)
         security_findings.append(finding)
 
