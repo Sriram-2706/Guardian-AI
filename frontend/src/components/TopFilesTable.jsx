@@ -18,7 +18,7 @@ function TopFilesTable({ files }) {
           <tbody className="divide-y divide-slate-800">
             {safeFiles.length > 0 ? (
               safeFiles.map((file, index) => (
-                <tr key={`${file.path || 'file'}-${index}`} className="text-slate-300">
+                <tr key={`${file.path || 'file'}-${index}`} className="text-slate-300 hover:bg-slate-950/70">
                   <td className="px-5 py-3">{file.path || 'Unknown path'}</td>
                   <td className="px-5 py-3">{file.extension || '—'}</td>
                   <td className="px-5 py-3">{file.score ?? '—'}</td>

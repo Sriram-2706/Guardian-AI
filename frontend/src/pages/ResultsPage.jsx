@@ -1,8 +1,14 @@
+import { useState } from 'react'
 import AnalysisSummary from '../components/AnalysisSummary'
+import CodeReference from '../components/CodeReference'
+import ExecutiveSummary from '../components/ExecutiveSummary'
+import FindingsSection from '../components/FindingsSection'
 import SecurityFindings from '../components/SecurityFindings'
 import TopFilesTable from '../components/TopFilesTable'
 
 function ResultsPage({ result, onReset }) {
+  const [showWarning, setShowWarning] = useState(true)
+
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(14,165,233,0.2),_transparent_45%),linear-gradient(135deg,_#020617,_#0f172a_45%,_#111827)] px-4 py-10 text-slate-100 sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-6xl flex-col gap-8">
@@ -21,12 +27,42 @@ function ResultsPage({ result, onReset }) {
           </button>
         </div>
 
+        {showWarning ? (
+          <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 text-amber-100 shadow-lg shadow-amber-500/20">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-300">Warning</p>
+                <p className="mt-2 text-sm text-amber-100">
+                  Last push by <span className="font-semibold text-white">Sriram</span> included an error code.
+                  Please review and close this issue.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowWarning(false)}
+                className="rounded-full border border-amber-500/50 bg-slate-950/80 px-3 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-amber-200 transition hover:bg-amber-500/20"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        ) : null}
+
         <AnalysisSummary result={result} />
 
         <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
           <TopFilesTable files={result.top_files} />
           <SecurityFindings findings={result.security_findings} />
         </div>
+
+        <div className="grid gap-6 xl:grid-cols-2">
+          <FindingsSection title="Quality Findings" findings={result.quality_findings} emptyMessage="No quality findings." />
+          <FindingsSection title="Performance Findings" findings={result.performance_findings} emptyMessage="No performance findings." />
+        </div>
+
+        <ExecutiveSummary report={result.advisor_report} />
+
+        <CodeReference />
       </div>
     </main>
   )
